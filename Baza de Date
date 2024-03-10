@@ -1,0 +1,103 @@
+#!/bin/bash
+#Proiect de semestru pentru Sisteme de operare
+#Neacsu Nicolae Stefan si Mocanu George Mihai
+#Seria B  Grupa 1006  Anul 1
+
+
+#subprogram pentru afisare
+view() {
+#afiseaza continutul din fisierul baza_de_date.txt
+ cat "baza_de_date.txt"
+}
+
+#subprogram pentru adaugarea unei persoane in baza_de_date.txt
+add() {
+#dupa afisarea textului preluam de la tastatura variabila de nume
+ read -p "Introdu numele persoanei: " name
+ #dupa afisarea textului preluam de la tastatura variabila de varsta
+ read -p "Introdu varsta persoanei: " age
+ #dupa afisarea textului preluam de la tastatura variabila de pozitie pe teren
+ read -p "Introdu pozitia pe teren: " poz
+ #introducem in baza_de_date variabilele citite anterior
+ echo "$name,$age,$poz" >> "baza_de_date.txt"
+ #afisam textul completarii actiunii
+ echo "Am adaugat persoana in baza de date."
+}
+
+#subprogram pentru cautarea unei persoane sau mai multe dupa un anumit criteriu
+search() {
+#preluam de la tastatura criteriul cerut
+ read -p "Introdu criteriul de cautare: " search_criteria
+#cautam existenta citeriului cautat in baza de date, iar in cazul in care gasim, se afiseaza toate persoanele care respecta criteriul
+ awk -F ',' -v search="$search_criteria" '$0 ~ search' "baza_de_date.txt"
+}
+
+#subprogram pentru actualizarea bazei de date
+update() {
+#introducem numele persoanei pe care vrem sa o actualizam
+ read -p "Introdu numele persoanei pe care doresti sa o actualizezi: " name
+#introducem varsta noua
+ read -p "Introdu noua varsta: " age
+#introducem noua pozitie
+ read -p "Introdu noua pozitie: " poz
+#facem trimitere la baza de date cu noile valori prin intermediul unui fisier temporar
+ awk -F ',' -v name="$name" -v age="$age" -v poz="$poz" 'BEGIN{OFS=","} $1==name {$2=age; $3=poz} {print}' "baza_de_date.txt" > "temp.txt"
+ mv "temp.txt" "baza_de_date.txt"
+ echo "Persoana a fost actualizata cu succes."
+}
+
+#subprogram pentru stergerea unei persoane din baza de date
+delete() {
+#introducem numele persoanei pe care vrem sa o stergem
+ read -p "Introdu numele persoanei pe care vrei sa o stergi: " name
+#in cazul in care persoana este gasita, tot prin intermediul unui fisier temporar, stocam doar datele necesare pentru a elimina persoana dorita
+ awk -F ',' -v name="$name" '$1!=name' "baza_de_date.txt" > "temp.txt"
+#mutam datele ramase inapoi in baza de date
+ mv "temp.txt" "baza_de_date.txt"
+ echo "Persoana a fost stearsa."
+}
+
+ #incepem o structura repetitiva pentru meniu in care afisam optiunile si posibilitatea alegerii uneia dintre ele
+while true; do
+	echo "---- MENIU ----"
+	echo "1) View"
+	echo "2) Add"
+	echo "3) Search"
+	echo "4) Update"
+	echo "5) Delete"
+	echo "6) Exit"
+	echo
+	echo
+	read -p "Alege o optiune: " option
+
+#incepem un case pentru fiecare posibilitate de optiune aleasa anterior, inclusiv una care nu face parte din lista, la fiecare dintre cazuri executam subprogramul corespunzator
+	case $option in
+	1)
+	  view
+	  ;;
+	2)
+	  add
+	  ;;
+	3)
+	  search
+	  ;;
+	4)
+	  update
+	  ;;
+	5)
+	  delete
+	  ;;
+	6)
+	  echo "La revedere!"
+	  break
+	  ;;
+	*)
+	  echo "Optiune invalida!"
+	  ;;
+	esac
+	echo
+	echo
+	echo
+done 
+
+
